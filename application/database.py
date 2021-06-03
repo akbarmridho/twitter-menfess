@@ -1,6 +1,6 @@
 from mongoengine import (connect as mongo_connect, Document, StringField,  # type: ignore
                          DictField, IntField, QuerySet, ListField, ReferenceField,
-                         DateTimeField, CASCADE)  # type: ignore
+                         DateTimeField, CASCADE, UUIDField)  # type: ignore
 from mongoengine.errors import ValidationError  # type: ignore
 from typing import Dict
 from os import getenv
@@ -41,6 +41,7 @@ class Configuration(Document):
 
 class User(Document):
     user_id = IntField(required=True, unique=True)
+    name = StringField(required=True, unique=True)
     trigger = StringField(required=True, min_length=3, max_length=20)
     oauth_key = StringField(required=True)
     oauth_secret = StringField(required=True)
@@ -62,6 +63,7 @@ class User(Document):
 
 class Queue(Document):
     user = ReferenceField(User, reverse_delete_rule=CASCADE, required=True)
+    queue_id = UUIDField(primary_key=True)
     message = StringField(required=True)
     media_id = IntField()
     sender_id = IntField()

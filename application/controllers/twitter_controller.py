@@ -2,7 +2,7 @@ from typing import Dict
 from flask import Blueprint, request
 from mongoengine.queryset.queryset import QuerySet  # type: ignore
 from application.twitter import webhook_challenge, validate_twitter_signature, process_message
-from application import connect, User
+from application import User
 
 bp = Blueprint('twitter', __name__)
 
@@ -21,8 +21,6 @@ def hook():
                 return
 
             message_event: Dict = data['direct_message_events']['message_create']
-
-            connect()
 
             for_user_id = int(data['for_user_id'])
             recipient_id = int(message_event['target']['recipient_id'])

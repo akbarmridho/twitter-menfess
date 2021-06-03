@@ -87,9 +87,10 @@ class API:
         return self._execute('POST', url, **payload)
 
     def unsubscribe_events(self, user_id: int) -> requests.Response:
-        # todo auth bearer token
         payload = {
-            'auth': 'bearer token! todo'
+            'headers': {
+                'Auth': 'Bearer ' + self.config.BEARER_TOKEN
+            }
         }
         url = '/account_activity/all/{}/subscriptions/{}.json'.format(
             self.config.ENV_NAME, user_id)
