@@ -16,10 +16,3 @@ class Encryption:
 
     def decrypt(self, value: str):
         return self.crypter.decrypt(value.encode('utf-8')).decode('utf-8')
-
-
-load_dotenv()
-
-chiper = Encryption()
-encrypt = chiper.encrypt('Hello world')
-print(chiper.decrypt(encrypt))

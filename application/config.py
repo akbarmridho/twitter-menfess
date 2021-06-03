@@ -2,16 +2,16 @@ from os import environ
 
 
 class Config:
-    DEBUG = True
+    FLASK_DEBUG = True
     DEVELOPMENT = True
-    ENV = 'development'
+    FLASK_ENV = 'development'
     APP_KEY = environ.get('APP_KEY')
 
 
 class ProductionConfig(Config):
-    DEBUG = False
+    FLASK_DEBUG = False
     DEVELOPMENT = False
-    ENV = 'production'
+    FLASK_ENV = 'production'
 
 
 def get_config() -> Config:

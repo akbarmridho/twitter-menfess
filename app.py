@@ -1,22 +1,23 @@
 from flask import Flask, request
-from .app import get_config
-from .app.twitter import webhook_challenge, validate_twitter_signature
-
-app = Flask(__name__)
-
-app.config.from_object(get_config())
+from application import get_config
+from application.twitter import webhook_challenge, validate_twitter_signature
+from application.controllers import twitter_controller
 
 
-@app.route('/')
-def home():
-    return "<p>Hello World</p>"
+def create_app():
+
+    app = Flask(__name__)
+
+    app.config.from_object(get_config())
+
+    app.register_blueprint(twitter_controller.bp)
+
+    @app.route('/')
+    def home():
+        return "<p>Hello World</p>"
+
+    return app
 
 
-@app.route('/service/listen', methods=['GET', 'POST'])
-def hook():
-    if request.method == 'GET':
-        return webhook_challenge()
-    elif request.method == 'POST':
-        if validate_twitter_signature():
-            pass
-            # process incoming message
+if __name__ == '__main__':
+    create_app().run()
