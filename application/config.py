@@ -15,6 +15,14 @@ class ProductionConfig(Config):
 
 
 def get_config() -> Config:
+    """Get application config
+
+    if APP_ENV set in production it will return production config
+    else it will return base/ development config
+
+    Returns:
+        Config: Flask App Config
+    """
     mode = environ.get('APP_ENV')
     if mode == 'production':
         return ProductionConfig()

@@ -7,6 +7,11 @@ import base64
 
 
 def webhook_challenge() -> Dict:
+    """Twitter regular webhook challenge
+
+    Returns:
+        Dict: response token
+    """
 
     crc_token = request.args.get('crc_token')
 
@@ -23,6 +28,11 @@ def webhook_challenge() -> Dict:
 
 
 def validate_twitter_signature() -> bool:
+    """Validate twitter signature every incoming request
+
+    Returns:
+        bool: True if valid
+    """
 
     to_compare = request.headers['x-twitter-webhooks-signature']
 

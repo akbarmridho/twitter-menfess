@@ -1,1 +1,1 @@
-from . import twitter_controller, register_controller
+from . import register_controller, twitter_controller

@@ -1,3 +1,3 @@
 from .config import get_config
-from .database import connect, User, Queue, Configuration
-from .scheduler import redis_scheduler
+from .database import Configuration, Queue, User, connect
+from .scheduler import get_redis_queue

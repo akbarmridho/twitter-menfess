@@ -2,8 +2,19 @@ from typing import List
 
 
 def filter_messages(source: str, to_match: List[str]) -> bool:
-    src = source.lower()
+    """Check if string contain any of forbidden wordlist
 
-    res = set(to_match).intersection(set(src.split()))
+    Args:
+        source (str): string to compare
+        to_match (List[str]): Forbidden words list
 
-    return len(res) == 0
+    Returns:
+        bool: True if it contain forbidden words
+    """
+    src = source.lower().split(' ')
+
+    for word in to_match:
+        if word in set(src):
+            return False
+
+    return True

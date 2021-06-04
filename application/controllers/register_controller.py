@@ -1,9 +1,9 @@
 from typing import Dict
-from flask import Blueprint, request, make_response
-from mongoengine.queryset.queryset import QuerySet  # type: ignore
 from application import User
-from application.twitter import API, UserConfig, TweepyAPI
 from application.helpers import Encryption
+from application.twitter import API, TweepyAPI, UserConfig
+from flask import Blueprint, make_response, request
+from mongoengine.queryset.queryset import QuerySet  # type: ignore
 from tweepy.models import User as TwitterUser  # type: ignore
 
 bp = Blueprint('register', __name__)
