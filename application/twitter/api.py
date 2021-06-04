@@ -99,12 +99,13 @@ class API:
 
 class TweepyAPI:
     app: TweepyTwitterAPI
+    auth: OAuthHandler
     config: UserConfig
 
     def __init__(self, user_config: UserConfig):
         self.config = user_config
-        auth = OAuthHandler(self.config.CUSTOMER_KEY,
-                            self.config.CUSTOMER_SECRET)
-        auth.set_access_token(self.config.OAUTH_TOKEN,
-                              self.config.OAUTH_SECRET)
-        self.app = TweepyTwitterAPI(auth)
+        self.auth = OAuthHandler(self.config.CUSTOMER_KEY,
+                                 self.config.CUSTOMER_SECRET)
+        self.auth.set_access_token(self.config.OAUTH_TOKEN,
+                                   self.config.OAUTH_SECRET)
+        self.app = TweepyTwitterAPI(self.auth)

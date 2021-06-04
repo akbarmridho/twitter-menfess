@@ -1,6 +1,6 @@
 from mongoengine import (connect as mongo_connect, Document, StringField,  # type: ignore
                          DictField, IntField, QuerySet, ListField, ReferenceField,
-                         DateTimeField, CASCADE, UUIDField)  # type: ignore
+                         DateTimeField, CASCADE, UUIDField, BooleanField)  # type: ignore
 from mongoengine.errors import ValidationError  # type: ignore
 from typing import Dict
 from os import getenv
@@ -36,7 +36,7 @@ def validate_time(input: str) -> bool:
 
 class Configuration(Document):
     name = StringField(required=True)
-    value = DictField(required=True)
+    value = StringField(required=True)
 
 
 class User(Document):
@@ -48,6 +48,7 @@ class User(Document):
     schedule = DictField(required=True)
     forbidden_words = ListField(required=True)
     created_at = DateTimeField(default=utc_now())
+    subscribed = BooleanField(default=False)
 
     def clean(self):
         schedule = self.schedule
@@ -70,7 +71,7 @@ class Queue(Document):
     scheduled_at = DateTimeField(required=True)
 
 
-def get_configuration(name: str) -> Dict:
+def get_configuration(name: str) -> str:
     result: QuerySet = Configuration.objects(name=name)
     if result.count() == 0:
         raise Exception('No configuration found!')

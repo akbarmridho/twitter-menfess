@@ -1,8 +1,10 @@
 from typing import Dict
 from flask import Blueprint, request, make_response
+from mongoengine.queryset.queryset import QuerySet  # type: ignore
 from application import User
-from application.twitter import API, UserConfig
+from application.twitter import API, UserConfig, TweepyAPI
 from application.helpers import Encryption
+from tweepy.models import User as TwitterUser  # type: ignore
 
 bp = Blueprint('register', __name__)
 
@@ -14,7 +16,6 @@ def register():
 
     required_keys = [
         'name',
-        'webhook_id',
         'trigger',
         'oauth_key',
         'oauth_secret',
@@ -31,27 +32,93 @@ def register():
     schedule = {
         'start_at': data['start'],
         'end_at': data['end'],
-        'interval': data['interval']
+        'interval': int(data['interval'])
     }
-
-    user = User(name=data['name'], trigger=data['trigger'],
-                oauth_key=data['oauth_key'], oauth_secret=data['oauth_secret'],
-                schedule=schedule, forbidden_words=data['forbidden_words'])
 
     chiper = Encryption()
 
-    config = UserConfig(chiper.decrypt(
-        data['oauth_key']), chiper.decrypt(data['oauth_secret']))
+    oauth_key = chiper.decrypt(data['oauth_key'])
+    oauth_secret = chiper.decrypt(data['oauth_secret'])
+
+    config = UserConfig(oauth_key, oauth_secret)
+
+    client = TweepyAPI(config)
+
+    twitter_user: TwitterUser = client.app.me()
+
+    user = User(user_id=twitter_user.id, name=data['name'], trigger=data['trigger'],
+                oauth_key=data['oauth_key'], oauth_secret=data['oauth_secret'],
+                schedule=schedule, forbidden_words=data['forbidden_words'], subscribed=False)
+
+    user.save()
+
+
+@bp.route('/user/delete/<name>', methods=['DELETE'])
+def delete(name: str):
+    user_query: QuerySet = User.objects(name=name)
+    if user_query.count() == 0:
+        return make_response('User not found', 404)
+    user: User = user_query.first()
+
+    if user.subscribed:
+        response = API(UserConfig('', '')).unsubscribe_events(user.user_id)
+        if response.ok:
+            user.subscribed = False
+        else:
+            return make_response('Failed to unsubscribe user', 500)
+
+    user.delete()
+
+
+@bp.route('/user/subscribe', methods=['POST'])
+def subscribe():
+
+    if request.method == 'POST':
+        data: Dict = request.get_json()
+
+    if not 'name' in data:
+        response = make_response('Missing data keys', 400)
+        return response
+
+    user_query: QuerySet = User.objects(name=data['name'])
+
+    if user_query.count() == 0:
+        return make_response('User not found', 404)
+    elif user_query.count() > 1:
+        return make_response('Duplicate users', 400)
+
+    user: User = user_query.first()
+
+    chiper = Encryption()
+
+    oauth_key = chiper.decrypt(user.oauth_key)
+    oauth_secret = chiper.decrypt(user.oauth_secret)
+
+    config = UserConfig(oauth_key, oauth_secret)
 
     client = API(config)
 
     response = client.subscribe_events()
 
     if response.ok:
-        data: Dict = response.json()
-        user_id = int(data['id'])
-        user.user_id = user_id
+        user.subscribed = True
         user.save()
     else:
         user.delete()
         return make_response('Failed to subscribe event', 214)
+
+
+@bp.route('/user/unsubscribe/<name>', methods=['DELETE'])
+def unsubscribe(name: str):
+    user_query: QuerySet = User.objects(name=name)
+    if user_query.count() == 0:
+        return make_response('User not found', 404)
+    user: User = user_query.first()
+
+    if user.subscribed:
+        response = API(UserConfig('', '')).unsubscribe_events(user.user_id)
+        if response.ok:
+            user.subscribed = False
+            user.save()
+        else:
+            return make_response('Failed to unsubscribe user', 500)
