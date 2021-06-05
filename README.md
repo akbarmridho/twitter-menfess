@@ -56,4 +56,4 @@ Run `unsubscribe_user.py` script.
 4. User's oauth token key and secret is encrypted in MongoDB database. It required `APP_KEY` for encrypt/decrypt proccess.
 
 ## Additional Information
-worker choice
+This application use Redis for queue management. If you want to use APScheduler, use `aps_worker.py` and comment out redis enqueuement code in `process_message` function at `autobase.py`.
