@@ -5,10 +5,18 @@ from os import getenv
 
 load_dotenv(project_path('.env'))
 
-webhook_url = input('Webhook url: ')
+host = input('Webhook url: ')
+endpoint = '/service/listen'
 
-config = UserConfig(getenv('TWITTER_OAUTH_KEY', ''),
-                    getenv('TWITTER_OAUTH_SECRET', ''))
+webhook_url = host + endpoint
+
+TWITTER_OAUTH_KEY = getenv('TWITTER_OAUTH_KEY')
+TWITTER_OAUTH_SECRET = getenv('TWITTER_OAUTH_SECRET')
+
+if not (TWITTER_OAUTH_KEY and TWITTER_OAUTH_SECRET):
+    raise Exception()
+
+config = UserConfig(TWITTER_OAUTH_KEY, TWITTER_OAUTH_SECRET)
 
 client = API(config)
 

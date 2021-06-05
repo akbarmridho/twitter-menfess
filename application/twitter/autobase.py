@@ -1,3 +1,4 @@
+from application.helpers.dates import utc_now
 import uuid
 from datetime import datetime, timedelta
 from typing import Union
@@ -42,8 +43,11 @@ def process_message(user: User, message: str, media_id: int, sender_id: int):
             full_message = 'Antrian penuh. Saat ini terdapat lebih dari 150 antrian. Silakan coba lagi nanti.'
             APIClient.app.send_direct_message(sender_id, full_message)
         else:
-            latest_queue: Queue = queues.first()
-            latest_schedule = latest_queue.scheduled_at
+            if queues.count() == 0:
+                latest_schedule = utc_now()
+            else:
+                latest_queue: Queue = queues.first()
+                latest_schedule = latest_queue.scheduled_at
 
             start_time = from_time(user.schedule['start_at'])
             end_time = from_time(user.schedule['end_at'])
