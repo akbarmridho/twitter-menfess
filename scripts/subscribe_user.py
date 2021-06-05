@@ -1,40 +1,17 @@
 import requests
 
 host = input('Enter webservice host url: (www.somesite.com)')
-endpoint = '/user/register'
+name = input('Enter registered user name: ')
+endpoint = '/user/subscribe'
 
 full_url = host + endpoint
 
-reader = open('cursed_words.txt', 'r')
-cursed_words = reader.read().splitlines()
-reader.close()
-
-name = input('Please enter name identifier. Alphanumeric only without spaces. ')
-trigger = input('Please enter autobase trigger: ')
-start = input(
-    'Please enter start time for tweet delivery in HH:MM or HH.MM format')
-end = input('Please enter start time for tweet delivery in HH:MM or HH.MM format')
-interval = int(
-    input('Please enter tweet interval for every delivered menfess'))
-oauth_key = input('Enter your oauth key')
-oauth_secret = input('Enter your oauth secret')
-
-data = {
-    'name': name,
-    'trigger': trigger,
-    'oauth_key': oauth_key,
-    'oauth_secret': oauth_secret,
-    'start': start,
-    'end': end,
-    'interval': interval,
-    'forbidden_words': cursed_words
-}
 headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-response = requests.post(full_url, headers=headers, json=data)
+
+response = requests.post(full_url, headers=headers, json={'name': name})
 
 if response.ok:
-    print('User subscribed')
+    print('Successfully subscribe user')
 else:
     print('Failed to subscribe user')
-
-print(response.text)
+    print(response.text)

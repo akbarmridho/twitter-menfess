@@ -1,9 +1,5 @@
-from dotenv import load_dotenv
-from application.helpers import project_path
 from application.twitter import UserConfig, API
 from os import getenv
-
-load_dotenv(project_path('.env'))
 
 webhook_id = getenv('WEBHOOK_ID')
 

@@ -1,9 +1,11 @@
-from flask import Flask, request
-from application import get_config, connect
-from application.controllers import twitter_controller, register_controller
-import sys
 import logging
 import os
+import sys
+
+from flask import Flask
+
+from application import connect, get_config
+from application.controllers import register_controller, twitter_controller
 
 
 def create_app():

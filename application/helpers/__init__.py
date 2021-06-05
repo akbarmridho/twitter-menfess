@@ -1,7 +1,9 @@
-from .encryption import Encryption
+from .encryption import Encryption, generate_decoded_hmac_hash, compare_digest
 from .filters import filter_messages
 from .dates import utc_now, from_time, to_local
 from os import path
+
+chiper = Encryption()
 
 
 def project_path(name: str) -> str:

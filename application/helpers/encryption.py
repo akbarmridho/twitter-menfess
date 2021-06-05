@@ -1,4 +1,8 @@
+import base64
+import hashlib
+import hmac
 from os import getenv
+
 from cryptography.fernet import Fernet
 
 
@@ -38,3 +42,34 @@ class Encryption:
             str: decrypted data
         """
         return self.crypter.decrypt(value.encode('utf-8')).decode('utf-8')
+
+
+def generate_decoded_hmac_hash(key: str, message: str) -> str:
+    """Create HMAC SHA-256 hash from incoming key and message
+
+    Args:
+        key (str): usually Twitter Custoemr Secret or APP_KEY
+        message (str)
+
+    Returns:
+        str: sha256 string
+    """
+    hmac_digest = hmac.digest(key=key.encode(
+        'UTF-8'), msg=message.encode('utf-8'), digest=hashlib.sha256)  # type: ignore
+
+    return 'sha256=' + base64.b64encode(hmac_digest).decode('ascii')
+
+
+def compare_digest(digest: str, another_digest: str) -> bool:
+    """Compare two hmac digest
+
+    Equal to a == b
+
+    Args:
+        digest (str): sha256=...
+        another_digest (str): sha256=...
+
+    Returns:
+        bool: True if equal
+    """
+    return hmac.compare_digest(digest, another_digest)

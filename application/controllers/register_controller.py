@@ -1,9 +1,10 @@
 from typing import Dict
 from application import User
-from application.helpers import Encryption
+from application.helpers import chiper
 from application.twitter import API, TweepyAPI, UserConfig
 from flask import Blueprint, make_response, request
 from mongoengine.queryset.queryset import QuerySet  # type: ignore
+from os import getenv
 from tweepy.models import User as TwitterUser  # type: ignore
 
 bp = Blueprint('register', __name__)
@@ -11,6 +12,22 @@ bp = Blueprint('register', __name__)
 
 @bp.route('/user/register', methods=['POST'])
 def register():
+    """User/autobase registration route
+
+    result saved in database's user collection
+
+    Request data:
+        name: user unique name identifier in application. Much like username. Should in alphanumeric without spaces
+        trigger: autobase word trigger
+        oauth_key: user's encrypted oauth access token
+        oauth_secret: user's ecrypted oauth access token secret
+        startt: time when to start menfess submission
+        end: time when to end menfess submission
+        interval: interval between each menfess submission
+        schedule: autobase schedule with start_at, end_at, and interval key
+        forbidden_words: list of forbidden words for corresponding autobase
+    """
+
     if request.method == 'POST':
         data: Dict = request.get_json()
 
@@ -26,7 +43,7 @@ def register():
     ]
 
     if not required_keys in data.keys():
-        response = make_response('Missing data keys', 403)
+        response = make_response('Missing data keys', 400)
         return response
 
     schedule = {
@@ -34,8 +51,6 @@ def register():
         'end_at': data['end'],
         'interval': int(data['interval'])
     }
-
-    chiper = Encryption()
 
     oauth_key = chiper.decrypt(data['oauth_key'])
     oauth_secret = chiper.decrypt(data['oauth_secret'])
@@ -55,13 +70,21 @@ def register():
 
 @bp.route('/user/delete/<name>', methods=['DELETE'])
 def delete(name: str):
+    """Delete user/autobase by its name
+
+    Args:
+        name (str): user name identifier
+
+    """
     user_query: QuerySet = User.objects(name=name)
     if user_query.count() == 0:
         return make_response('User not found', 404)
     user: User = user_query.first()
 
     if user.subscribed:
-        response = API(UserConfig('', '')).unsubscribe_events(user.user_id)
+        response = API(UserConfig(chiper.decrypt(user.oauth_key), chiper.decrypt(
+            user.oauth_secret))).unsubscribe_events(user.user_id)
+
         if response.ok:
             user.subscribed = False
         else:
@@ -72,6 +95,10 @@ def delete(name: str):
 
 @bp.route('/user/subscribe', methods=['POST'])
 def subscribe():
+    """Subscribe user to listen account activity API events
+
+    Events will be delivered to this site webhook
+    """
 
     if request.method == 'POST':
         data: Dict = request.get_json()
@@ -89,12 +116,8 @@ def subscribe():
 
     user: User = user_query.first()
 
-    chiper = Encryption()
-
-    oauth_key = chiper.decrypt(user.oauth_key)
-    oauth_secret = chiper.decrypt(user.oauth_secret)
-
-    config = UserConfig(oauth_key, oauth_secret)
+    config = UserConfig(chiper.decrypt(user.oauth_key),
+                        chiper.decrypt(user.oauth_secret))
 
     client = API(config)
 
@@ -104,19 +127,27 @@ def subscribe():
         user.subscribed = True
         user.save()
     else:
-        user.delete()
-        return make_response('Failed to subscribe event', 214)
+        return make_response('Failed to subscribe event', 400)
 
 
 @bp.route('/user/unsubscribe/<name>', methods=['DELETE'])
 def unsubscribe(name: str):
+    """Unsubscribe user from twitter accoutn activity API events
+
+    Args:
+        name (str): user name identifier
+    """
+
     user_query: QuerySet = User.objects(name=name)
+
     if user_query.count() == 0:
         return make_response('User not found', 404)
+
     user: User = user_query.first()
 
     if user.subscribed:
         response = API(UserConfig('', '')).unsubscribe_events(user.user_id)
+
         if response.ok:
             user.subscribed = False
             user.save()
