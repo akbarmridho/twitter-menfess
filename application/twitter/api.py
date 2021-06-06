@@ -104,13 +104,33 @@ class API:
             'params': {
                 'url': url
             },
+            'data': {
+                'url': url
+            },
             'auth': self._get_auth()
         }
 
-        url = '/account_activity/all/{}/webhooks.json'.format(
+        api_url = '/account_activity/all/{}/webhooks.json'.format(
             self.config.ENV_NAME)
 
-        return self._execute('POST', url, **payload)
+        return self._execute('POST', api_url, **payload)
+
+    def get_webhooks(self) -> requests.Response:
+        """Get all registered webhook
+
+        Returns:
+            requests.Response: Response object
+        """
+
+        payload = {
+            'headers': {
+                'authorization': 'Bearer ' + self.config.BEARER_TOKEN
+            }
+        }
+
+        url = '/account_activity/all/webhooks.json'
+
+        return self._execute('GET', url, **payload)
 
     def delete_webhooks(self, id: str) -> requests.Response:
         """Delete application webhook
@@ -160,7 +180,7 @@ class API:
 
         payload = {
             'headers': {
-                'Auth': 'Bearer ' + self.config.BEARER_TOKEN
+                'authorization': 'Bearer ' + self.config.BEARER_TOKEN
             }
         }
 

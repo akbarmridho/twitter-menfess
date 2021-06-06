@@ -45,8 +45,8 @@ def register_user():
     response = requests.post(full_url, headers=headers, json=data)
 
     if response.ok:
-        print('User subscribed')
+        print('User registered')
     else:
-        print('Failed to subscribe user')
+        print('Failed to register user')
 
     print(response.text)

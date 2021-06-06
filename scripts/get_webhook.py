@@ -2,12 +2,7 @@ from application.twitter import UserConfig, API
 from os import getenv
 
 
-def register_webhook():
-    host = input('Webhook url: ')
-    endpoint = '/service/listen'
-
-    webhook_url = host + endpoint
-
+def get_webhook():
     TWITTER_OAUTH_KEY = getenv('TWITTER_OAUTH_KEY')
     TWITTER_OAUTH_SECRET = getenv('TWITTER_OAUTH_SECRET')
 
@@ -18,7 +13,7 @@ def register_webhook():
 
     client = API(config)
 
-    response = client.register_webhooks(webhook_url)
+    response = client.get_webhooks()
 
     if response.ok:
         print('Webhook registered')

@@ -1,5 +1,5 @@
 from typing import Dict
-from flask import Blueprint, request
+from flask import Blueprint, request, make_response
 from mongoengine.queryset.queryset import QuerySet  # type: ignore
 from application.twitter import webhook_challenge, validate_twitter_signature, process_message
 from application import User
@@ -16,6 +16,8 @@ def hook():
     POST request handle Twitter's User Activity API events
     """
 
+    ok_response = make_response({'code': 200}, 200)
+
     if request.method == 'GET' or request.method == 'PUT':
         return webhook_challenge()
     elif request.method == 'POST':
@@ -23,7 +25,7 @@ def hook():
 
         # check if it is direct message event
         if not "direct_message_events" in data:
-            return
+            return ok_response
 
         message_event: Dict = data['direct_message_events']['message_create']
 
@@ -32,12 +34,12 @@ def hook():
 
         # if outgoing message
         if for_user_id != recipient_id:
-            return
+            return ok_response
 
         user_collection: QuerySet = User.objects(user_id=for_user_id)
 
         if user_collection.count() == 0:
-            return
+            return ok_response
 
         user: User = user_collection.first()
         message_text: str = message_event['message_data']['text']
@@ -51,4 +53,4 @@ def hook():
         if user.trigger in message_text:
             process_message(user, message_text, media_id, sender_id)
 
-        return
+        return ok_response

@@ -6,6 +6,7 @@ from scripts.register_user import register_user
 from scripts.register_webhook import register_webhook
 from scripts.subscribe_user import subscribe_user
 from scripts.unsubscribe_user import unsubscribe_user
+from scripts.get_webhook import get_webhook
 
 options = {
     '1': generate_key,
@@ -13,9 +14,10 @@ options = {
     '3': register_user,
     '4': delete_user,
     '5': register_webhook,
-    '6': delete_webhook,
-    '7': subscribe_user,
-    '8': unsubscribe_user
+    '6': get_webhook,
+    '7': delete_webhook,
+    '8': subscribe_user,
+    '9': unsubscribe_user
 }
 
 print('Available options')
@@ -24,9 +26,10 @@ print('2. Generate oauth key')
 print('3. Register user')
 print('4. Delete user')
 print('5. Register webhook')
-print('6. Delete webhook')
-print('7. Subscribe user')
-print('8. Unsubscribe user')
+print('6. Get webhook')
+print('7. Delete webhook')
+print('8. Subscribe user')
+print('9. Unsubscribe user')
 
 opt = input('Choose your option: ')
 
