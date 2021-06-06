@@ -71,7 +71,7 @@ def process_message(user: User, message: str, media_id: int, sender_id: int):
             redis_scheduler.enqueue_at(
                 tweet_schedule, process_queue_rq, queue_id)
 
-            queue_number = queues.count() + 1
+            queue_number = queues.count()
 
             date = to_local(tweet_schedule).strftime("%d %B %Y %H:%M")
 

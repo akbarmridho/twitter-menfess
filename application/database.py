@@ -112,7 +112,7 @@ class Queue(Document):
         scheduled_at: Tweet schedule
     """
     user = ReferenceField(User, reverse_delete_rule=CASCADE, required=True)
-    queue_id = UUIDField(primary_key=True)
+    queue_id = UUIDField(required=True)
     message = StringField(required=True)
     media_id = IntField()
     sender_id = IntField()
