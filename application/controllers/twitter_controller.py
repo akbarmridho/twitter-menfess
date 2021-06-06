@@ -1,7 +1,7 @@
 from typing import Dict
-from flask import Blueprint, request, make_response
+from flask import Blueprint, request, make_response, current_app
 from mongoengine.queryset.queryset import QuerySet  # type: ignore
-from application.twitter import webhook_challenge, validate_twitter_signature, process_message
+from application.twitter import webhook_challenge, process_message
 from application import User
 
 bp = Blueprint('twitter', __name__)
@@ -26,6 +26,10 @@ def hook():
         # check if it is direct message event
         if not "direct_message_events" in data:
             return ok_response
+
+        current_app.logger.info(data)
+
+        return ok_response
 
         message_event: Dict = data['direct_message_events']['message_create']
 
