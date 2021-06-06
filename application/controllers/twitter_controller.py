@@ -23,11 +23,11 @@ def hook():
     elif request.method == 'POST':
         data: Dict = request.get_json()
 
+        current_app.logger.error(data)
+
         # check if it is direct message event
         if not "direct_message_events" in data:
             return ok_response
-
-        current_app.logger.info(data)
 
         return ok_response
 
