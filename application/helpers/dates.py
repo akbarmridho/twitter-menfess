@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from pytz import UTC, timezone
 from typing import Iterator
 
@@ -46,7 +46,8 @@ def from_time(time: str) -> datetime:
         datetime: today date
     """
     [hours, minutes] = _convert_string_to_time(time)
-    return utc_now().replace(hour=hours, minute=minutes)
+
+    return utc_now().replace(hour=0, minute=0) + timedelta(hours=hours, minutes=minutes)
 
 
 def local_now() -> datetime:
