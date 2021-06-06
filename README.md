@@ -25,29 +25,31 @@ This web application will listen to events sent by Twitter Account Activity API 
 
 ## Application Configuration
 
+You should run every script from `script.py` file. Then, choose corresponding option
+
 ### Generate Application Key
-Run `generate_key.py` script and save its output to `APP_KEY` environment variable. This key will be use for encrypt and decrypt user OAuth key in database. If the key is lost, you would not able to encrypt and decrypt existing user OAuth key.
+Save its output to `APP_KEY` environment variable. This key will be use for encrypt and decrypt user OAuth key in database. If the key is lost, you would not able to encrypt and decrypt existing user OAuth key.
 
 ### Request OAuth1 Token
-Run `request_oauth.py` script and save its output to `TWITTER_OAUTH_KEY` and `TWITTER_OAUTH_SECRET` environment variable. If you run this request on behalf of another user, don't save this key to your environment variable since it will be stored in database.
+Save its output to `TWITTER_OAUTH_KEY` and `TWITTER_OAUTH_SECRET` environment variable. If you run this request on behalf of another user, don't save this key to your environment variable since it will be stored in database.
 
 ### Register Webhook
-Run `register_webhook.py` script. Fill your application host without following slash. Example: www.example.com. Please note that for sandbox tier Twitter Account Activity API only one webhook that is supported. Save webhook_id to `WEBHOOK_ID` environment variable.
+Fill your application host without following slash. Example: www.example.com. Please note that for sandbox tier Twitter Account Activity API only one webhook that is supported. Save webhook_id to `WEBHOOK_ID` environment variable.
 
 ### Delete Webhook
-Run `delete_webhook.py` script.
+Clear enough
 
 ### Register User
-Run `register_user.py` script. Make sure registering user have requested their OAuth1 token. Registered user won't automatically subscribed to every account event so you should subscribe manually.
+Make sure registering user have requested their OAuth1 token. Registered user won't automatically subscribed to every account event so you should subscribe manually.
 
 ### Delete User
-Run `delete_user.py` script.
+Clear enough
 
 ### Subscribe User
-Run `subscribe_user.py` script. 
+Clear enough
 
 ### Unubscribe User
-Run `unsubscribe_user.py` script. 
+Clear enough
 
 ## Security
 1. Twitter webhook endpoint already meet Twitter CRC requirement.

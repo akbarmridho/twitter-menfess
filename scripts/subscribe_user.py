@@ -1,17 +1,19 @@
 import requests
 
-host = input('Enter webservice host url: (www.somesite.com)')
-name = input('Enter registered user name: ')
-endpoint = '/user/subscribe'
 
-full_url = host + endpoint
+def subscribe_user():
+    host = input('Enter webservice host url: (www.somesite.com)')
+    name = input('Enter registered user name: ')
+    endpoint = '/user/subscribe'
 
-headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    full_url = host + endpoint
 
-response = requests.post(full_url, headers=headers, json={'name': name})
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 
-if response.ok:
-    print('Successfully subscribe user')
-else:
-    print('Failed to subscribe user')
-    print(response.text)
+    response = requests.post(full_url, headers=headers, json={'name': name})
+
+    if response.ok:
+        print('Successfully subscribe user')
+    else:
+        print('Failed to subscribe user')
+        print(response.text)

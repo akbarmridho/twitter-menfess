@@ -1,45 +1,52 @@
 import requests
-from application.helpers import chiper
+from application.helpers import Encryption
+from os import path
 
-# Set site endpoint
-host = input('Enter webservice host url: (www.somesite.com)')
-endpoint = '/user/register'
-full_url = host + endpoint
 
-# Get forbidden words data
-reader = open('cursed_words.txt', 'r')
-cursed_words = reader.read().splitlines()
-reader.close()
+def register_user():
+    # Set site endpoint
+    host = input('Enter webservice host url: (www.somesite.com) ')
+    endpoint = '/user/register'
+    full_url = host + endpoint
 
-name = input('Please enter name identifier. Alphanumeric only without spaces. ')
-trigger = input('Please enter autobase trigger: ')
-start = input(
-    'Please enter start time for tweet delivery in HH:MM or HH.MM format')
-end = input('Please enter start time for tweet delivery in HH:MM or HH.MM format')
-interval = int(
-    input('Please enter tweet interval for every delivered menfess'))
-oauth_key = input('Enter your oauth key')
-oauth_secret = input('Enter your oauth secret')
+    # Get forbidden words data
+    reader = open(path.join(path.dirname(__file__), 'cursed_words.txt'), 'r')
+    cursed_words = reader.read().splitlines()
+    reader.close()
 
-data = {
-    'name': name,
-    'trigger': trigger,
-    'oauth_key': chiper.encrypt(oauth_key),
-    'oauth_secret': chiper.encrypt(oauth_secret),
-    'start': start,
-    'end': end,
-    'interval': interval,
-    'forbidden_words': cursed_words
-}
+    chiper = Encryption()
 
-headers = {'Content-type': 'application/json',
-           'Accept': 'text/plain'}
+    name = input(
+        'Please enter name identifier. Alphanumeric only without spaces. ')
+    trigger = input('Please enter autobase trigger: ')
+    start = input(
+        'Please enter start time for tweet delivery in HH:MM or HH.MM format: ')
+    end = input(
+        'Please enter start time for tweet delivery in HH:MM or HH.MM format: ')
+    interval = int(
+        input('Please enter tweet interval for every delivered menfess: '))
+    oauth_key = input('Enter your oauth key: ')
+    oauth_secret = input('Enter your oauth secret: ')
 
-response = requests.post(full_url, headers=headers, json=data)
+    data = {
+        'name': name,
+        'trigger': trigger,
+        'oauth_key': chiper.encrypt(oauth_key),
+        'oauth_secret': chiper.encrypt(oauth_secret),
+        'start': start,
+        'end': end,
+        'interval': interval,
+        'forbidden_words': cursed_words
+    }
 
-if response.ok:
-    print('User subscribed')
-else:
-    print('Failed to subscribe user')
+    headers = {'Content-type': 'application/json',
+               'Accept': 'text/plain'}
 
-print(response.text)
+    response = requests.post(full_url, headers=headers, json=data)
+
+    if response.ok:
+        print('User subscribed')
+    else:
+        print('Failed to subscribe user')
+
+    print(response.text)

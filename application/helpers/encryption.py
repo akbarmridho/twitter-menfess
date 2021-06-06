@@ -18,7 +18,12 @@ class Encryption:
     crypter: Fernet
 
     def __init__(self):
-        self.key = bytes(getenv('APP_KEY'), 'utf-8')
+        APP_KEY = getenv('APP_KEY')
+
+        if not APP_KEY:
+            raise Exception('Cannot load APP_KEY')
+
+        self.key = bytes(APP_KEY, 'utf-8')
         self.crypter = Fernet(self.key)
 
     def encrypt(self, value: str) -> str:

@@ -1,6 +1,6 @@
 from typing import Dict
 from application import User
-from application.helpers import chiper
+from application.helpers import Encryption
 from application.twitter import API, TweepyAPI, UserConfig
 from flask import Blueprint, make_response, request
 from mongoengine.queryset.queryset import QuerySet  # type: ignore
@@ -42,15 +42,19 @@ def register():
         'forbidden_words'
     ]
 
-    if not required_keys in data.keys():
-        response = make_response('Missing data keys', 400)
-        return response
+    input_keys = data.keys()
+
+    for key in required_keys:
+        if not key in input_keys:
+            return make_response('Missing data keys', 400)
 
     schedule = {
         'start_at': data['start'],
         'end_at': data['end'],
         'interval': int(data['interval'])
     }
+
+    chiper = Encryption()
 
     oauth_key = chiper.decrypt(data['oauth_key'])
     oauth_secret = chiper.decrypt(data['oauth_secret'])
@@ -67,6 +71,8 @@ def register():
 
     user.save()
 
+    return make_response('', 200)
+
 
 @bp.route('/user/delete/<name>', methods=['DELETE'])
 def delete(name: str):
@@ -82,6 +88,8 @@ def delete(name: str):
     user: User = user_query.first()
 
     if user.subscribed:
+        chiper = Encryption()
+
         response = API(UserConfig(chiper.decrypt(user.oauth_key), chiper.decrypt(
             user.oauth_secret))).unsubscribe_events(user.user_id)
 
@@ -91,6 +99,8 @@ def delete(name: str):
             return make_response('Failed to unsubscribe user', 500)
 
     user.delete()
+
+    return make_response('', 200)
 
 
 @bp.route('/user/subscribe', methods=['POST'])
@@ -116,6 +126,8 @@ def subscribe():
 
     user: User = user_query.first()
 
+    chiper = Encryption()
+
     config = UserConfig(chiper.decrypt(user.oauth_key),
                         chiper.decrypt(user.oauth_secret))
 
@@ -128,6 +140,8 @@ def subscribe():
         user.save()
     else:
         return make_response('Failed to subscribe event', 400)
+
+    return make_response('', 200)
 
 
 @bp.route('/user/unsubscribe/<name>', methods=['DELETE'])
@@ -153,3 +167,5 @@ def unsubscribe(name: str):
             user.save()
         else:
             return make_response('Failed to unsubscribe user', 500)
+
+    return make_response('', 200)
