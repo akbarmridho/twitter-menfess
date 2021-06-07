@@ -41,7 +41,7 @@ def hook():
                 return ok_response
 
             # check if has hastag
-            entities: Dict = message_event['message_data']['text']
+            entities: Dict = message_event['message_data']
             if 'hashtags' in entities:
                 hashtags = entities['hashtags']
                 if isinstance(hashtags, List):

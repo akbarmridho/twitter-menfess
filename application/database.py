@@ -107,7 +107,7 @@ class Queue(Document):
         user: user document reference field
         queue_id: queue id
         message: follower's message to tweet
-        media_id: media (image or video) that attached to follower's message. 0 if no media attached
+        media_url: media (image or video) url that attached to follower's message. empty string if no media attached
         job_id: Redis job id
         sender_id: sender twitter id
         scheduled_at: Tweet schedule
