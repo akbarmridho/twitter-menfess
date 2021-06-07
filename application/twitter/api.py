@@ -247,7 +247,7 @@ class TweepyAPI:
         """
         file = tempfile.NamedTemporaryFile(suffix=self._guess_extension(url))
 
-        res = requests.get(url, stream=True)
+        res = requests.get(url, stream=True, auth=self.auth.apply_auth())
 
         if res.ok:
             for chunk in res:
