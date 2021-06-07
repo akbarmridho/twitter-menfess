@@ -1,9 +1,6 @@
 from datetime import datetime, timedelta
 from pytz import UTC, timezone
 from typing import Iterator
-import locale
-
-locale.setlocale(locale.LC_ALL, 'id_ID')
 
 
 def _convert_string_to_time(time: str) -> Iterator[int]:
