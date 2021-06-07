@@ -1,3 +1,4 @@
+from os import replace
 from application.helpers.dates import utc_now
 import uuid
 from datetime import datetime, timedelta
@@ -5,7 +6,7 @@ from typing import Union
 
 from application import Queue, User, get_redis_queue
 from application.helpers import (Encryption, filter_messages, from_time,
-                                 to_local)
+                                 to_local, replace_to_utc)
 from application.helpers.filters import filter_messages
 from application.twitter import TweepyAPI, UserConfig
 from mongoengine.queryset.queryset import QuerySet  # type: ignore
@@ -39,15 +40,20 @@ def process_message(user: User, message: str, media_id: int, sender_id: int):
         # Check current queue and get all queues order by schedule (descending or from latest to earliest)
         queues: QuerySet = Queue.objects(user=user).order_by('-scheduled_at')
 
-        if queues.count() >= 150:
-            full_message = 'Antrian penuh. Saat ini terdapat lebih dari 150 antrian. Silakan coba lagi nanti.'
+        if queues.count() >= 50:
+            full_message = 'Antrian penuh. Saat ini terdapat lebih dari lima puluh antrian. Silakan coba lagi nanti.'
             APIClient.app.send_direct_message(sender_id, full_message)
         else:
+            now = utc_now()
+
             if queues.count() == 0:
-                latest_schedule = utc_now()
+                latest_schedule = now
             else:
                 latest_queue: Queue = queues.first()
-                latest_schedule = latest_queue.scheduled_at
+                latest_queue_schedule = replace_to_utc(
+                    latest_queue.scheduled_at)
+                if latest_queue_schedule > now:
+                    latest_schedule = latest_queue_schedule
 
             start_time = from_time(user.schedule['start_at'])
             end_time = from_time(user.schedule['end_at'])
@@ -73,7 +79,7 @@ def process_message(user: User, message: str, media_id: int, sender_id: int):
 
             queue_number = queues.count()
 
-            date = to_local(tweet_schedule).strftime("%d %B %Y %H:%M")
+            date = to_local(tweet_schedule).strftime("%-d %B %Y %H:%M")
 
             message = "Pesan anda akan diproses. Nomor antrian anda {}. Tweet akan dikirim pada {}.".format(
                 queue_number, date)
@@ -118,9 +124,10 @@ def process_queue_rq(id: Union[str, uuid.UUID]):
     if not isinstance(id, uuid.UUID):
         id = uuid.UUID(id)
 
-    queue: Queue = Queue.objects(queue_id=id).first()
+    queue_query: QuerySet = Queue.objects(queue_id=id)
 
-    process_queue(queue)
+    if queue_query.count() != 0:
+        process_queue(queue_query.first())
 
 
 def schedule_tweet(latest_time: datetime, start: datetime, end: datetime, interval: int) -> datetime:
@@ -135,7 +142,9 @@ def schedule_tweet(latest_time: datetime, start: datetime, end: datetime, interv
     Returns:
         datetime: Queue schedule
     """
-    if latest_time + timedelta(minutes=interval) > end:
+    if utc_now() < start:
+        return start + timedelta(minutes=interval)
+    elif latest_time + timedelta(minutes=interval) > end:
         return start + timedelta(days=1)
     else:
         return latest_time + timedelta(minutes=interval)

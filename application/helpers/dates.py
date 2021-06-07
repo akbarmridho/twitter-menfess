@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta
 from pytz import UTC, timezone
 from typing import Iterator
+import locale
+
+locale.setlocale(locale.LC_ALL, 'id_ID')
 
 
 def _convert_string_to_time(time: str) -> Iterator[int]:
@@ -34,6 +37,19 @@ def utc_now() -> datetime:
         datetime: UTC Now
     """
     return datetime.utcnow().replace(tzinfo=UTC)
+
+
+def replace_to_utc(value: datetime) -> datetime:
+    """Replace current timezone info to UTC
+    Does not convert timezone difference
+
+    Args:
+        value (datetime): [description]
+
+    Returns:
+        datetime: datetime aware
+    """
+    return value.replace(tzinfo=UTC)
 
 
 def from_time(time: str) -> datetime:

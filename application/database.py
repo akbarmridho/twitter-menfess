@@ -18,7 +18,7 @@ def connect() -> MongoClient:
     """
     db_name = getenv('DB_NAME')
     db_host = getenv('DB_HOST')
-    return mongo_connect(db_name, host=db_host)
+    return mongo_connect(db_name, host=db_host, connect=False)
 
 
 def validate_time(input: str) -> bool:

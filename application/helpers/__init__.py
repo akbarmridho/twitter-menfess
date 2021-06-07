@@ -1,6 +1,6 @@
 from .encryption import Encryption, generate_decoded_hmac_hash, compare_digest
 from .filters import filter_messages
-from .dates import utc_now, from_time, to_local
+from .dates import utc_now, from_time, to_local, replace_to_utc
 from os import path
 
 
