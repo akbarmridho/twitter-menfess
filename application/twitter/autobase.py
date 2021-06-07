@@ -81,7 +81,7 @@ def process_message(user: User, message: str, media_url: str, sender_id: int):
 
             date = to_local(tweet_schedule).strftime("%-d %B %Y %H:%M")
 
-            message = "Pesan anda akan diproses. Nomor antrian anda {}. Tweet akan dikirim pada {}.".format(
+            message = "Pesan anda akan diproses. Nomor antrian anda {}. Tweet akan dikirim pada {}. Gunakan perintah /cancel untuk membatalkan pesan".format(
                 queue_number, date)
 
             APIClient.app.send_direct_message(sender_id, message)
@@ -128,6 +128,18 @@ def cancel_queue_rq(queue: Queue):
     job: Job = redis.fetch_job(queue.job_id)
     job.delete()
     queue.delete()
+
+    user: User = queue.user
+
+    chiper = Encryption()
+
+    config = UserConfig(chiper.decrypt(user.oauth_key),
+                        chiper.decrypt(user.oauth_secret))
+
+    APIClient = TweepyAPI(config)
+
+    APIClient.app.send_direct_message(
+        queue.sender_id, 'Pesan anda sudah dibatalkan')
 
 
 def process_queue_rq(id: Union[str, uuid.UUID]):
