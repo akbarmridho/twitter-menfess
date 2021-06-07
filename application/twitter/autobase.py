@@ -1,18 +1,18 @@
-from os import replace
-from application.helpers.dates import utc_now
 import uuid
 from datetime import datetime, timedelta
 from typing import Union
 
 from application import Queue, User, get_redis_queue
 from application.helpers import (Encryption, filter_messages, from_time,
-                                 to_local, replace_to_utc)
+                                 replace_to_utc, to_local)
+from application.helpers.dates import utc_now
 from application.helpers.filters import filter_messages
 from application.twitter import TweepyAPI, UserConfig
 from mongoengine.queryset.queryset import QuerySet  # type: ignore
+from rq.job import Job  # type: ignore
 
 
-def process_message(user: User, message: str, media_id: int, sender_id: int):
+def process_message(user: User, message: str, media_url: str, sender_id: int):
     """Process incoming message
 
     Flow:
@@ -24,7 +24,7 @@ def process_message(user: User, message: str, media_id: int, sender_id: int):
     Args:
         user (User): User object
         message (str): Direct message to process
-        media_id (int): attached direct message media
+        media_url (str): Attached medai url
         sender_id (int): Sender twitter id
     """
 
@@ -65,17 +65,17 @@ def process_message(user: User, message: str, media_id: int, sender_id: int):
 
             queue_id = uuid.uuid4()
 
-            # Create new queue
-            queue = Queue(user=user, message=message, queue_id=queue_id,
-                          media_id=media_id, scheduled_at=tweet_schedule, sender_id=sender_id)
-
-            queue.save()
-
             # schedule tweet with Redis Queue
             redis_scheduler = get_redis_queue()
 
-            redis_scheduler.enqueue_at(
+            job: Job = redis_scheduler.enqueue_at(
                 tweet_schedule, process_queue_rq, queue_id)
+
+            # Create new queue
+            queue = Queue(user=user, message=message, queue_id=queue_id, job_id=job.id,
+                          media_url=media_url, scheduled_at=tweet_schedule, sender_id=sender_id)
+
+            queue.save()
 
             queue_number = queues.count()
 
@@ -106,12 +106,27 @@ def process_queue(queue: Queue):
 
     APIClient = TweepyAPI(config)
 
-    if queue.media_id == 0:
+    if queue.media_url == '':
         APIClient.app.update_status(status=queue.message)
     else:
-        APIClient.app.update_status(
-            status=queue.message, media_ids=[queue.media_id])
+        media_id = APIClient.upload_from_url(queue.media_url)
 
+        APIClient.app.update_status(
+            status=queue.message, media_ids=[media_id])
+
+    queue.delete()
+
+
+def cancel_queue_rq(queue: Queue):
+    """Cancel active queue
+
+    Args:
+        queue (Queue): Queue document
+    """
+
+    redis = get_redis_queue()
+    job: Job = redis.fetch_job(queue.job_id)
+    job.delete()
     queue.delete()
 
 
@@ -127,7 +142,10 @@ def process_queue_rq(id: Union[str, uuid.UUID]):
     queue_query: QuerySet = Queue.objects(queue_id=id)
 
     if queue_query.count() != 0:
-        process_queue(queue_query.first())
+        try:
+            process_queue(queue_query.first())
+        except:
+            queue_query.first().delete()
 
 
 def schedule_tweet(latest_time: datetime, start: datetime, end: datetime, interval: int) -> datetime:

@@ -108,13 +108,15 @@ class Queue(Document):
         queue_id: queue id
         message: follower's message to tweet
         media_id: media (image or video) that attached to follower's message. 0 if no media attached
+        job_id: Redis job id
         sender_id: sender twitter id
         scheduled_at: Tweet schedule
     """
     user = ReferenceField(User, reverse_delete_rule=CASCADE, required=True)
     queue_id = UUIDField(required=True)
+    job_id = StringField()
     message = StringField(required=True)
-    media_id = IntField()
+    media_url = StringField()
     sender_id = IntField()
     scheduled_at = DateTimeField(required=True)
 

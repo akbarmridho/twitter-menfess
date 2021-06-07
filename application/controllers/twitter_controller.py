@@ -1,8 +1,8 @@
 from typing import Dict, List
 from flask import Blueprint, request, make_response, current_app
 from mongoengine.queryset.queryset import QuerySet  # type: ignore
-from application.twitter import webhook_challenge, process_message
-from application import User
+from application.twitter import webhook_challenge, process_message, cancel_queue_rq
+from application import User, Queue
 
 bp = Blueprint('twitter', __name__)
 
@@ -40,6 +40,14 @@ def hook():
             if for_user_id != recipient_id:
                 return ok_response
 
+            # check if has hastag
+            entities: Dict = message_event['message_data']['text']
+            if 'hashtags' in entities:
+                hashtags = entities['hashtags']
+                if isinstance(hashtags, List):
+                    if len(hashtags) != 0:
+                        return ok_response
+
             user_collection: QuerySet = User.objects(user_id=for_user_id)
 
             if user_collection.count() == 0:
@@ -47,14 +55,24 @@ def hook():
 
             user: User = user_collection.first()
             message_text: str = message_event['message_data']['text']
-            media_id = 0
+            media_url = ''
             sender_id = int(message_event['sender_id'])
 
             if 'attachment' in message_event['message_data'] and 'type' in message_event['message_data']['attachment'] and message_event['message_data']['attachment']['type'] == 'media':
-                media_id = int(
-                    message_event['message_data']['attachment']['media']['id'])
+                media_url = message_event['message_data']['attachment']['media']['id']
+
+            sender_queue: QuerySet = Queue.objects(
+                user=user, sender_id=sender_id)
 
             if user.trigger in message_text:
-                process_message(user, message_text, media_id, sender_id)
+                # Do not process if sender have active queue
+                if sender_queue.count() != 0:
+                    return ok_response
+                else:
+                    process_message(user, message_text, media_url, sender_id)
+            elif '/cancel' in message_text:
+                # Cancel queue
+                if sender_queue.count() != 0:
+                    cancel_queue_rq(sender_queue.first())
 
         return ok_response

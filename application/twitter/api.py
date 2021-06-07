@@ -1,9 +1,13 @@
+import mimetypes
+import tempfile
 from os import getenv
+from typing import Tuple
 
 import requests
 from requests_oauthlib import OAuth1  # type: ignore
 from tweepy import API as TweepyTwitterAPI  # type: ignore
 from tweepy import OAuthHandler
+from tweepy.models import Media  # type: ignore
 
 
 class Config:
@@ -217,3 +221,42 @@ class TweepyAPI:
                                    self.config.OAUTH_SECRET)
 
         self.app = TweepyTwitterAPI(self.auth)
+
+    def _guess_extension(self, url) -> str:
+        """Guess file extension from url
+
+        Returns:
+            str: File extension (with dot)
+        """
+        mime_types: Tuple = mimetypes.guess_type(url)
+        for mime_type in mime_types:
+            if not mime_type == None:
+                guess = mimetypes.guess_extension(mime_type)
+                if not guess == None:
+                    return guess  # type: ignore
+        raise Exception('Cannot guess extension')
+
+    def upload_from_url(self, url) -> int:
+        """Upload image, video, or gif from url
+
+        Args:
+            url: file url
+
+        Returns:
+            int: Twitter media id
+        """
+        file = tempfile.NamedTemporaryFile(suffix=self._guess_extension(url))
+
+        res = requests.get(url, stream=True)
+
+        if res.ok:
+            for chunk in res:
+                file.write(chunk)
+        else:
+            raise Exception('Cannot load file')
+
+        twitter_media: Media = self.app.media_upload(file.name, file=file)
+
+        file.close()
+
+        return twitter_media.media_id

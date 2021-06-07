@@ -11,10 +11,15 @@ def filter_messages(source: str, to_match: List[str]) -> bool:
     Returns:
         bool: True if it contain forbidden words
     """
-    src = source.lower().split(' ')
+    lines = source.lower().splitlines()
+
+    to_filters = []
+
+    for line in lines:
+        to_filters.extend(line.split(' '))
 
     for word in to_match:
-        if word in set(src):
+        if word in set(to_filters):
             return False
 
     return True
