@@ -71,6 +71,11 @@ def process_message(user: User, message: str, media_url: str, sender_id: int):
             job: Job = redis_scheduler.enqueue_at(
                 tweet_schedule, process_queue_rq, queue_id)
 
+            # if message has media, strip trailing https://t.co/xxxx link
+            link_index = message.find('https://t.co/')
+            if link_index != -1 and media_url != '':
+                message = message[:link_index].strip()
+
             # Create new queue
             queue = Queue(user=user, message=message, queue_id=queue_id, job_id=job.id,
                           media_url=media_url, scheduled_at=tweet_schedule, sender_id=sender_id)
@@ -81,10 +86,10 @@ def process_message(user: User, message: str, media_url: str, sender_id: int):
 
             date = to_local(tweet_schedule).strftime("%-d %B %Y %H:%M")
 
-            message = "Pesan anda akan diproses. Nomor antrian anda {}. Tweet akan dikirim pada {}. Gunakan perintah /cancel untuk membatalkan pesan".format(
+            response_message = "Pesan anda akan diproses. Nomor antrian anda {}. Tweet akan dikirim pada {}. Gunakan perintah /cancel untuk membatalkan pesan".format(
                 queue_number, date)
 
-            APIClient.app.send_direct_message(sender_id, message)
+            APIClient.app.send_direct_message(sender_id, response_message)
     else:
         error_message = 'Pesan yang anda kirim mengandung kata yang tidak diperbolehkan. Pesan anda tidak akan diproses'
         APIClient.app.send_direct_message(sender_id, error_message)

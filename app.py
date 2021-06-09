@@ -25,7 +25,11 @@ def create_app():
 
     if 'DYNO' in os.environ:
         app.logger.addHandler(logging.StreamHandler(sys.stdout))
-        app.logger.setLevel(logging.ERROR)
+
+        if app.debug:
+            app.logger.setLevel(logging.INFO)
+        else:
+            app.logger.setLevel(logging.ERROR)
 
     return app
 

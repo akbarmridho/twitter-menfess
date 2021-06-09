@@ -58,6 +58,8 @@ def hook():
             media_url = ''
             sender_id = int(message_event['sender_id'])
 
+            current_app.logger.info('Incoming message event: ' + message_event)
+
             if 'attachment' in message_event['message_data'] and 'type' in message_event['message_data']['attachment'] and message_event['message_data']['attachment']['type'] == 'media':
                 media_url = message_event['message_data']['attachment']['media']['media_url']
 
