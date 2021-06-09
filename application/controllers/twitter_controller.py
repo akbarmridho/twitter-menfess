@@ -62,7 +62,12 @@ def hook():
                 'Incoming message event: ' + message_event.__str__())
 
             if 'attachment' in message_event['message_data'] and 'type' in message_event['message_data']['attachment'] and message_event['message_data']['attachment']['type'] == 'media':
-                media_url = message_event['message_data']['attachment']['media']['media_url']
+                media_type = message_event['message_data']['attachment']['media']['type']
+
+                if media_type == 'photo':
+                    media_url = message_event['message_data']['attachment']['media']['media_url']
+                elif media_type == 'video' or media_type == 'animated_gif':
+                    media_url = message_event['message_data']['attachment']['media']['video_info']['variants'][0]['url']
 
             sender_queue: QuerySet = Queue.objects(
                 user=user, sender_id=sender_id)

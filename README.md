@@ -56,6 +56,3 @@ Clear enough
 2. You could verify twitter signature for every incoming events for additional webhook protection. If you want to enable this feature, run `validate_twitter_signature` function in webhook route before process incoming event.
 3. Every route in `register_controller.py` **does not** require authentication and authorization. It is a huge security concern so proceed with caution if you really want to use this for production. For basic authentication, you could add `Auth: Bearer sha256=xxx` header for every request and validate it from server side. You could use `generate_decoded_hmac_hash` and `compare_digest` function in encryption module. Hmac hash key is APP_KEY and its message is up to you.
 4. User's oauth token key and secret is encrypted in MongoDB database. It required `APP_KEY` for encrypt/decrypt proccess.
-
-## Known Issues
-- Unable to forward received gif message to status as it will converted into image.
