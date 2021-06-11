@@ -8,6 +8,7 @@ from application.helpers import (Encryption, filter_messages, from_time,
 from application.helpers.dates import utc_now
 from application.helpers.filters import filter_messages
 from application.twitter import TweepyAPI, UserConfig
+from furl import furl  # type: ignore
 from mongoengine.queryset.queryset import QuerySet  # type: ignore
 from rq.job import Job  # type: ignore
 
@@ -114,7 +115,9 @@ def process_queue(queue: Queue):
     if queue.media_url == '':
         APIClient.app.update_status(status=queue.message)
     else:
-        media_id = APIClient.upload_from_url(queue.media_url)
+        cleaned_url = furl(queue.media_url).remove(
+            args=True, fragment=True).url
+        media_id = APIClient.upload_from_url(cleaned_url)
 
         APIClient.app.update_status(
             status=queue.message, media_ids=[media_id])
