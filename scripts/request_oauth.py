@@ -1,5 +1,5 @@
 from application.twitter import UserConfig, TweepyAPI  # type: ignore
-from tweepy import TweepError  # type: ignore
+from tweepy import TweepyException  # type: ignore
 
 
 def register_oauth():
@@ -9,7 +9,7 @@ def register_oauth():
     # get auth url
     try:
         redirect_url = client.auth.get_authorization_url()
-    except TweepError:
+    except TweepyException:
         print('Failed to get request token')
 
     print('Visit following url in a web browser and authorize this app to access your twitter account')
@@ -22,7 +22,7 @@ def register_oauth():
         client.auth.get_access_token(verifier_code)
         oauth_token = client.auth.access_token
         oauth_secret = client.auth.access_token_secret
-    except TweepError:
+    except TweepyException:
         print('Failed to get access token')
 
     if oauth_token and oauth_secret:
