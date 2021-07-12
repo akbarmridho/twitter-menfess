@@ -4,10 +4,11 @@ from os import getenv
 from typing import Tuple
 
 import requests
-from requests_oauthlib import OAuth1  # type: ignore
-from tweepy import API as TweepyTwitterAPI  # type: ignore
+from requests_oauthlib import OAuth1
+from tweepy import API as TweepyTwitterAPI
 from tweepy import OAuthHandler
-from tweepy.models import Media  # type: ignore
+from tweepy.models import Media, Status
+from application.helpers import split_message
 
 
 class Config:
@@ -260,3 +261,29 @@ class TweepyAPI:
         file.close()
 
         return twitter_media.media_id
+
+    def update_status(self, message: str, media_id: int = None):
+        """Update status with and without media id
+
+        Automatically split long messages into several tweet
+
+        Args:
+            message (str): [description]
+            media_id (int, optional): [description]. Defaults to None.
+        """
+
+        tweets = split_message(message)
+
+        if media_id is not None:
+            response: Status = self.app.update_status(
+                status=tweets[0], media_ids=[media_id])
+        else:
+            response = self.app.update_status(status=tweets[0])
+
+        to_quote_id: int = response.id
+
+        if len(tweets) > 1:
+            for tweet in tweets[1:]:
+                response = self.app.update_status(
+                    status=tweet, in_reply_to_status_id=to_quote_id, auto_populate_reply_metadata=True)
+                to_quote_id = response.id

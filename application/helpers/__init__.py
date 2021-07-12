@@ -1,5 +1,5 @@
 from .encryption import Encryption, generate_decoded_hmac_hash, compare_digest
-from .filters import filter_messages
+from .filters import filter_messages, split_message
 from .dates import utc_now, from_time, to_local, replace_to_utc
 from os import path
 

@@ -1,6 +1,6 @@
 from typing import Dict, List
 from flask import Blueprint, request, make_response, current_app
-from mongoengine.queryset.queryset import QuerySet  # type: ignore
+from mongoengine.queryset.queryset import QuerySet
 from application.twitter import webhook_challenge, process_message, cancel_queue_rq
 from application import User, Queue
 
@@ -79,7 +79,8 @@ def hook():
             sender_queue: QuerySet = Queue.objects(
                 user=user, sender_id=sender_id)
 
-            if user.trigger in message_text:
+            # limit submission to 1000 chars
+            if user.trigger in message_text and len(message_text) < 1000:
                 # Do not process if sender have active queue
                 if sender_queue.count() != 0:
                     return ok_response

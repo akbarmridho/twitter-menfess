@@ -1,6 +1,29 @@
 from typing import List
 
 
+def split_message(source: str, limit: int = 280) -> List[str]:
+    """Split single string into list of string limited by their length.
+
+    If list have more than one element, every element except the last
+    will contain ' cont.' string.
+
+    This function will truncate by words.
+
+    Args:
+        source (str): [description]
+        limit (int, optional): [description]. Defaults to 280.
+
+    Returns:
+        List[str]: [description]
+    """
+    if len(source) < limit:
+        return [source]
+
+    split_index = source[:limit-6].rfind(' ')
+
+    return [source[:split_index] + ' cont.', *split_message(source[split_index:], limit)]
+
+
 def filter_messages(source: str, to_match: List[str]) -> bool:
     """Check if string contain any of forbidden wordlist
 
