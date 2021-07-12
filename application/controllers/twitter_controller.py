@@ -67,7 +67,7 @@ def hook():
                 if media_type == 'photo':
                     media_url = message_event['message_data']['attachment']['media']['media_url']
 
-                elif media_type == 'video' or media_type == 'animated_gif':
+                elif media_type == 'video':
                     video_variants = message_event['message_data']['attachment']['media']['video_info']['variants']
 
                     for variant in video_variants:
@@ -75,9 +75,6 @@ def hook():
                             # take biggest bitrate
                             if int(variant['bitrate']) == 2176000:
                                 media_url = variant['url']
-
-                elif media_type == 'animated_gif':
-                    media_url = message_event['message_data']['attachment']['media']['video_info']['variants'][0]['url']
 
             sender_queue: QuerySet = Queue.objects(
                 user=user, sender_id=sender_id)
