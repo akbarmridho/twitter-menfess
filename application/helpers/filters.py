@@ -16,10 +16,15 @@ def split_message(source: str, limit: int = 280) -> List[str]:
     Returns:
         List[str]: [description]
     """
+    source = source.strip()
+
     if len(source) < limit:
         return [source]
 
     split_index = source[:limit-6].rfind(' ')
+
+    if split_index == -1 or split_index == 0:
+        split_index = limit-6
 
     return [source[:split_index] + ' cont.', *split_message(source[split_index:], limit)]
 
