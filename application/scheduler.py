@@ -1,4 +1,4 @@
-from rq import Queue as RQueue  # type: ignore
+from rq import Queue as RQueue
 from os import getenv
 import redis
 

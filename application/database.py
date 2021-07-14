@@ -1,11 +1,10 @@
 from os import getenv
-
-from mongoengine import (CASCADE, BooleanField, DateTimeField,  # type: ignore
+from mongoengine import (CASCADE, BooleanField, DateTimeField,
                          DictField, Document, IntField, ListField, QuerySet,
                          ReferenceField, StringField, UUIDField)
-from mongoengine import connect as mongo_connect  # type: ignore
-from mongoengine.errors import ValidationError  # type: ignore
-from pymongo import MongoClient  # type: ignore
+from mongoengine import connect as mongo_connect
+from mongoengine.errors import ValidationError
+from pymongo import MongoClient
 
 from application.helpers import utc_now
 

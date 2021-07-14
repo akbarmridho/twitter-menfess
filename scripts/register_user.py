@@ -6,7 +6,7 @@ from os import path
 def register_user():
     # Set site endpoint
     host = input('Enter webservice host url: (www.somesite.com) ')
-    endpoint = '/user/register'
+    endpoint = '/api/users'
     full_url = host + endpoint
 
     # Get forbidden words data

@@ -4,7 +4,7 @@ import requests
 def delete_user():
     host = input('Enter webservice host url: (www.somesite.com): ')
     name = input('Enter registered user name: ')
-    endpoint = '/user/delete/{}'.format(name)
+    endpoint = '/api/users/{}'.format(name)
 
     full_url = host + endpoint
 

@@ -4,7 +4,7 @@ import requests
 def unsubscribe_user():
     host = input('Enter webservice host url: (www.somesite.com): ')
     name = input('Enter registered user name: ')
-    endpoint = '/user/unsubscribe/{}'.format(name)
+    endpoint = f'/api/users/{name}/subscription'
 
     full_url = host + endpoint
 
