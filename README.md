@@ -8,8 +8,7 @@ This web application will listen to events sent by Twitter Account Activity API 
 2. Each autobase have different trigger, schedule, interval, and forbidden wordlist.
 3. Support word filtering.
 4. Support regular message, image, and video.
-5. Does not support quoted tweet (yet).
-6. Only support one webhook.
+5. Only support one webhook.
 
 ## Prerequisites
 1. Hosting to run Flask web application.
@@ -21,7 +20,7 @@ This web application will listen to events sent by Twitter Account Activity API 
 
 ## Install Dependencies
 1. Create python virtual environment for this project.
-2. Run `pip3 install -r requirements.txt`
+2. Run `pip install -r requirements.txt`
 
 ## Application Configuration
 
